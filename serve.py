@@ -6,13 +6,17 @@ import bson
 import bottle
 import pymongo
 
-import utils
 from settings import settings
 
 _db = None
 
 #############
 # Content
+
+@bottle.route('/')
+def index():
+    return bottle.static_file('index.html', root='static')
+
 
 @bottle.route('/favicon.ico')
 def favicon():
@@ -27,36 +31,40 @@ def server_static(filename):
 #############
 # API
 
-
 @bottle.route('/api/clusters')
 def clusters():
-    return utils.get_or_404('Topic','conv')
+    return get_or_404('Topic','conv')
 
 
 @bottle.route('/api/crowd/:crowd_id')
 def crowd(crowd_id):
-    return utils.get_or_404('Crowd',int(crowd_id))
+    return get_or_404('Crowd',int(crowd_id))
 
 
 @bottle.route('/api/crowd/:crowd_id/tweets')
 def crowd_tweets(crowd_id):
+    next = bottle.request.query.next
+    query = {'cid':int(crowd_id)}
+    if next:
+        query['_id'] = {'$gt':int(next)}
     cursor = _db['Tweet'].find(
-        {'cid':int(crowd_id)},
+        query,
         sort=[('_id',1)],
-        limit=100,
+        limit=20,
     )
-    return utils.dumps(dict(
-        tweets = [utils.add_id_str(doc) for doc in cursor],
-        #FIXME: paging
+    tweets = [add_id_str(doc) for doc in cursor]
+    return dumps(dict(
+        tweets = tweets,
+        next = str(tweets[-1]['_id']) if tweets else '',
     ))
 
 
 @bottle.route('/api/user/:user_id')
 def user(user_id):
-    doc = utils.get_or_404('User',int(user_id))
+    doc = get_or_404('User',int(user_id))
     for k in ['rfrds','jfols','jfrds','jats','gnp']:
         del doc[k]
-    return utils.dumps(doc)
+    return dumps(doc)
 
 
 #############
@@ -70,7 +78,6 @@ def add_id_str(doc):
 def dumps(doc):
     class Encoder(json.JSONEncoder):
         def default(self, value, **kwargs):
-            #FIXME: handle dbref
             if isinstance(value, bson.ObjectId):
                 return {"$oid":unicode(value)}
             elif isinstance(value, datetime.datetime):
