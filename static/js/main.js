@@ -51,16 +51,11 @@ function show_clusters(map) {
           circle_options
           ).addTo(map);
         circle.on('click',function(e){
-            if(open_cluster) {
-              //FIXME: magic
-            }
-            open_cluster = null;
             map.setView(clust.mloc,10);
             get_json('/api/crowd/'+clust.cids[0],{},function(crowd) {
               var popup = L.popup().setLatLng(clust.mloc);
               popup.setContent("hi");
               popup.openOn(map);
-              console.log(crowd);
             });
         });
 
@@ -69,13 +64,31 @@ function show_clusters(map) {
         var lng = clust.mloc[1];
         var delta = 0.005*Math.sqrt(clust.size);
         var square = L.rectangle(
-          [[lat-delta,lng-delta],[lat+delta,lng+delta]],
+          [[lat-delta,lng-1.3*delta],[lat+delta,lng+1.3*delta]],
           square_options
-          ).addTo(map);
+        ).addTo(map);
         square.on('click',function(e){
-          open_cluster = clust;
+          map.setView(clust.mloc,8);
+          if (open_cluster) {
+            open_cluster.setStyle({opacity:0.5,fillOpacity:0.5});
+            $.each(cluster_crowds, function(index, circle) {
+                map.removeLayer(circle);
+            });
+          }
+          open_cluster = square;
+          cluster_crowds = [];
+          square.setStyle({opacity:0.1,fillOpacity:0.02});
           get_json('/api/crowd/bulk',{cids:clust.cids.join()},function(crowds) {
-              console.log(crowds);
+              $.each(crowds.crowds, function(index, crowd) {
+                crowd.mloc.reverse();
+                var circle = L.circle(
+                  crowd.mloc,
+                  500*Math.sqrt(crowd.uids.length),
+                  circle_options
+                ).addTo(map);
+                circle.bindPopup('hi');
+                cluster_crowds.push(circle);
+              });
           });
 
         });
