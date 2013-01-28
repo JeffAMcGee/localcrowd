@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+import datetime
 import json
 
+import bson
 import bottle
 import pymongo
 
@@ -9,6 +11,8 @@ from settings import settings
 
 _db = None
 
+#############
+# Content
 
 @bottle.route('/favicon.ico')
 def favicon():
@@ -20,16 +24,18 @@ def server_static(filename):
     return bottle.static_file(filename, root='static')
 
 
+#############
+# API
+
+
 @bottle.route('/api/clusters')
 def clusters():
-    doc = _db['Topic'].find_one({'_id':'conv'})
-    return doc
+    return utils.get_or_404('Topic','conv')
 
 
 @bottle.route('/api/crowd/:crowd_id')
 def crowd(crowd_id):
-    doc = _db['Crowd'].find_one({'_id':int(crowd_id)})
-    return doc
+    return utils.get_or_404('Crowd',int(crowd_id))
 
 
 @bottle.route('/api/crowd/:crowd_id/tweets')
@@ -47,11 +53,38 @@ def crowd_tweets(crowd_id):
 
 @bottle.route('/api/user/:user_id')
 def user(user_id):
-    # FIXME: remove location info
-    doc = _db['User'].find_one({'_id':int(user_id)})
+    doc = utils.get_or_404('User',int(user_id))
     for k in ['rfrds','jfols','jfrds','jats','gnp']:
         del doc[k]
     return utils.dumps(doc)
+
+
+#############
+# helpers
+
+def add_id_str(doc):
+    doc['$id_str'] = dumps(doc['_id'])
+    return doc
+
+
+def dumps(doc):
+    class Encoder(json.JSONEncoder):
+        def default(self, value, **kwargs):
+            #FIXME: handle dbref
+            if isinstance(value, bson.ObjectId):
+                return {"$oid":unicode(value)}
+            elif isinstance(value, datetime.datetime):
+                return {"$date":int(value.strftime('%s'))}
+            else:
+                return json.JSONEncoder.default(self, value, **kwargs)
+    return json.dumps(doc,cls=Encoder)
+
+
+def get_or_404(collection,id):
+    doc = _db[collection].find_one({'_id':id})
+    if not doc:
+        bottle.abort(404,'Not Found')
+    return doc
 
 
 if __name__=="__main__":
