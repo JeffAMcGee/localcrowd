@@ -20,14 +20,68 @@ function get_json(url,data,success) {
   });
 }
 
+
 function show_clusters(map) {
+  var circle_options = {
+      stroke: true,
+      color: 'red',
+      fillColor: 'red',
+      opacity: 0.5,
+      fillOpacity: 0.5
+  };
+  var square_options = {
+        stroke: true,
+        color: 'blue',
+        fillColor: 'blue',
+        opacity: 0.5,
+        fillOpacity: 0.5
+  };
+
   get_json('/api/clusters',{},function(data) {
+    var open_cluster = null;
+    var cluster_crowds = [];
     $.each(data.cls, function(index, clust) {
-      var circle = L.circle(clust.mloc.reverse(), 500*Math.sqrt(clust.size), {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0.5
-      }).addTo(map);
+      clust.mloc.reverse();
+
+      var single = (clust.cids.length===1);
+      if (single) {
+        var circle = L.circle(
+          clust.mloc,
+          500*Math.sqrt(clust.size),
+          circle_options
+          ).addTo(map);
+        circle.on('click',function(e){
+            if(open_cluster) {
+              //FIXME: magic
+            }
+            open_cluster = null;
+            map.setView(clust.mloc,10);
+            get_json('/api/crowd/'+clust.cids[0],{},function(crowd) {
+              var popup = L.popup().setLatLng(clust.mloc);
+              popup.setContent("hi");
+              popup.openOn(map);
+              console.log(crowd);
+            });
+        });
+
+      } else {
+        var lat = clust.mloc[0];
+        var lng = clust.mloc[1];
+        var delta = 0.005*Math.sqrt(clust.size);
+        var square = L.rectangle(
+          [[lat-delta,lng-delta],[lat+delta,lng+delta]],
+          square_options
+          ).addTo(map);
+        square.on('click',function(e){
+          open_cluster = clust;
+          get_json('/api/crowd/bulk',{cids:clust.cids.join()},function(crowds) {
+              console.log(crowds);
+          });
+
+        });
+
+
+      }
     });
   });
 }

@@ -36,6 +36,14 @@ def clusters():
     return get_or_404('Topic','conv')
 
 
+@bottle.route('/api/crowd/bulk')
+def crowd_bulk():
+    cids_ = bottle.request.query.cids
+    cids = [int(cid) for cid in cids_.split(',')]
+    crowds = _db['Crowd'].find( {'_id':{'$in':cids}} )
+    return dict(crowds=list(crowds))
+
+
 @bottle.route('/api/crowd/:crowd_id')
 def crowd(crowd_id):
     return get_or_404('Crowd',int(crowd_id))
