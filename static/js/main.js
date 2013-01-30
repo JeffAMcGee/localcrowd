@@ -21,7 +21,7 @@ function get_json(url,data,success) {
 }
 
 function noise() {
-  return 0.02*(Math.random()-0.5);
+  return 0.05*(Math.random()-0.5);
 }
 
 function show_vines(map,last) {
@@ -53,7 +53,7 @@ $(function() {
 
   L.tileLayer( 'http://{s}.tile.cloudmade.com/3c84c4f923824f7cb6836564e90876f3/84377/256/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://cloudmade.com">CloudMade</a>',
-      maxZoom: 14
+      maxZoom: 15
   }).addTo(map);
 
   show_vines(map,'');
