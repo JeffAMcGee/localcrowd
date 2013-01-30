@@ -39,7 +39,7 @@ function show_vines(map,last) {
         [lat+noise(),lng+noise()],
         {icon: icon}
       ).addTo(map);
-      text = '<iframe height="380" src="'+tweet.vine+'/card" frameborder="0" width="380"></iframe>';
+      text = '<iframe height="380" src="'+tweet.vine+'/card" frameborder="0" width="380"></iframe><br>Posted by <a href="http://twitter.com/'+tweet.user_d.sn+'">@'+tweet.user_d.sn+'</a>';
       marker.bindPopup(text,{maxWidth:500});
     });
     setTimeout(
