@@ -21,80 +21,18 @@ function get_json(url,data,success) {
 }
 
 
-function show_clusters(map) {
-  var circle_options = {
-      stroke: true,
-      color: 'red',
-      fillColor: 'red',
-      opacity: 0.5,
-      fillOpacity: 0.5
-  };
-  var square_options = {
-        stroke: true,
-        color: 'blue',
-        fillColor: 'blue',
-        opacity: 0.5,
-        fillOpacity: 0.5
-  };
-
-  get_json('/api/clusters',{},function(data) {
-    var open_cluster = null;
-    var cluster_crowds = [];
-    $.each(data.cls, function(index, clust) {
-      clust.mloc.reverse();
-
-      var single = (clust.cids.length===1);
-      if (single) {
-        var circle = L.circle(
-          clust.mloc,
-          500*Math.sqrt(clust.size),
-          circle_options
-          ).addTo(map);
-        circle.on('click',function(e){
-            map.setView(clust.mloc,10);
-            get_json('/api/crowd/'+clust.cids[0],{},function(crowd) {
-              var popup = L.popup().setLatLng(clust.mloc);
-              popup.setContent("hi");
-              popup.openOn(map);
-            });
-        });
-
-      } else {
-        var lat = clust.mloc[0];
-        var lng = clust.mloc[1];
-        var delta = 0.005*Math.sqrt(clust.size);
-        var square = L.rectangle(
-          [[lat-delta,lng-1.3*delta],[lat+delta,lng+1.3*delta]],
-          square_options
-        ).addTo(map);
-        square.on('click',function(e){
-          map.setView(clust.mloc,8);
-          if (open_cluster) {
-            open_cluster.setStyle({opacity:0.5,fillOpacity:0.5});
-            $.each(cluster_crowds, function(index, circle) {
-                map.removeLayer(circle);
-            });
-          }
-          open_cluster = square;
-          cluster_crowds = [];
-          square.setStyle({opacity:0.1,fillOpacity:0.02});
-          get_json('/api/crowd/bulk',{cids:clust.cids.join()},function(crowds) {
-              $.each(crowds.crowds, function(index, crowd) {
-                crowd.mloc.reverse();
-                var circle = L.circle(
-                  crowd.mloc,
-                  500*Math.sqrt(crowd.uids.length),
-                  circle_options
-                ).addTo(map);
-                circle.bindPopup('hi');
-                cluster_crowds.push(circle);
-              });
-          });
-
-        });
-
-
-      }
+function show_vines(map) {
+  get_json('/api/tweets',{},function(data) {
+    $.each(data.tweets, function(index, tweet) {
+      tweet.user_d.ploc.reverse();
+      var icon = L.icon({
+          iconUrl: tweet.user_d.img,
+          iconAnchor: [24,24],
+          iconSize: [48, 48]
+      });
+      var marker = L.marker(tweet.user_d.ploc, {icon: icon}).addTo(map);
+      text = '<iframe height="380" src="'+tweet.vine+'/card" frameborder="0" width="380"></iframe>';
+      marker.bindPopup(text,{maxWidth:500});
     });
   });
 }
@@ -107,5 +45,5 @@ $(function() {
       maxZoom: 18
   }).addTo(map);
 
-  show_clusters(map);
+  show_vines(map);
 });
