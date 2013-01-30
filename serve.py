@@ -33,11 +33,12 @@ def server_static(filename):
 
 @bottle.route('/api/tweets')
 def tweets():
-    docs = list(_db['Tweet'].find())
-    return dumps(dict(
-        tweets = docs,
-        last = str(max(doc['_id'] for doc in docs)),
-    ))
+    last = bottle.request.query.last
+    q = {'_id':{'$gt':int(last)}} if last else {}
+    docs = list(_db['Tweet'].find(q))
+    if docs:
+        last = str(max(doc['_id'] for doc in docs))
+    return dumps(dict( tweets = docs, last = last ))
 
 #############
 # helpers
