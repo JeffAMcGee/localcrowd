@@ -1,3 +1,4 @@
+var crowd_template = _.template($('#crowd_template').html());
 
 function get_json(url,data,success) {
   $.ajax(url,{
@@ -20,6 +21,13 @@ function get_json(url,data,success) {
   });
 }
 
+function crowd_popup(crowd) {
+  var view = $($.trim(crowd_template(crowd)));
+  view.find('a').click(function() {
+    alert('bam');
+  });
+  return view[0];
+}
 
 function show_clusters(map) {
   var circle_options = {
@@ -54,7 +62,7 @@ function show_clusters(map) {
             map.setView(clust.mloc,10);
             get_json('/api/crowd/'+clust.cids[0],{},function(crowd) {
               var popup = L.popup().setLatLng(clust.mloc);
-              popup.setContent("hi");
+              popup.setContent(crowd_popup(crowd));
               popup.openOn(map);
             });
         });
@@ -92,8 +100,6 @@ function show_clusters(map) {
           });
 
         });
-
-
       }
     });
   });
