@@ -25,8 +25,7 @@ function noise() {
 }
 
 function show_vines(map,last) {
-  get_json('/api/tweets',{last:last},function(data) {
-    console.log(data.tweets.length);
+  get_json('/vinemap/api/tweets',{last:last},function(data) {
     $.each(data.tweets, function(index, tweet) {
       var lng = tweet.user_d.ploc[0];
       var lat = tweet.user_d.ploc[1];

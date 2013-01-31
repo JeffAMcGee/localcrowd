@@ -63,4 +63,4 @@ if __name__=="__main__":
     _db = cli[settings['mongo_db']]
     bottle.run(host=settings['http_host'],
                port=settings['http_port'],
-               reloader=True)
+               server='flup')
