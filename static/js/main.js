@@ -1,4 +1,5 @@
 var crowd_template = _.template($('#crowd_template').html());
+var tweet_template = _.template($('#tweet_template').html());
 
 function get_json(url,data,success) {
   $.ajax(url,{
@@ -23,9 +24,30 @@ function get_json(url,data,success) {
 
 function crowd_popup(crowd) {
   var view = $($.trim(crowd_template(crowd)));
-  view.find('a').click(function() {
-    alert('bam');
+  var next = '';
+  var container = view.find('.tweets');
+  var fetching = true;
+
+  function fetch_tweets() {
+    get_json('/api/crowd/'+crowd._id+'/tweets',{next:next},function(data) {
+      $.each(data.tweets, function(index, tweet) {
+        container.append(tweet_template(tweet));
+      });
+      next = data.next;
+      fetching = false;
+    });
+  }
+
+  fetch_tweets();
+
+  container.scroll(function(event) {
+      var bottom = this.scrollHeight-$(this).scrollTop()-$(this).height();
+      if( bottom<=30 && !fetching && next) {
+        fetching = true;
+        fetch_tweets();
+      }
   });
+
   return view[0];
 }
 
@@ -61,7 +83,8 @@ function show_clusters(map) {
         circle.on('click',function(e){
             map.setView(clust.mloc,10);
             get_json('/api/crowd/'+clust.cids[0],{},function(crowd) {
-              var popup = L.popup().setLatLng(clust.mloc);
+              var popup = L.popup({minWidth:500,maxWidth:600});
+              popup.setLatLng(clust.mloc);
               popup.setContent(crowd_popup(crowd));
               popup.openOn(map);
             });

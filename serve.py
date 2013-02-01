@@ -51,6 +51,7 @@ def crowd(crowd_id):
 
 @bottle.route('/api/crowd/:crowd_id/tweets')
 def crowd_tweets(crowd_id):
+    page_size = 20
     next = bottle.request.query.next
     query = {'cid':int(crowd_id)}
     if next:
@@ -58,12 +59,12 @@ def crowd_tweets(crowd_id):
     cursor = _db['Tweet'].find(
         query,
         sort=[('_id',1)],
-        limit=20,
+        limit=page_size,
     )
     tweets = [add_id_str(doc) for doc in cursor]
     return dumps(dict(
         tweets = tweets,
-        next = str(tweets[-1]['_id']) if tweets else '',
+        next = str(tweets[-1]['_id']) if len(tweets)==page_size else '',
     ))
 
 
