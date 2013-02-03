@@ -73,52 +73,9 @@ function crowd_tweets(tweets_div,crowd) {
 }
 
 function show_clusters(map) {
-  var square_options = {
-        stroke: true,
-        color: 'blue',
-        fillColor: 'blue',
-        opacity: 0.5,
-        fillOpacity: 0.5
-  };
-
-  get_json('/api/clusters',{},function(data) {
-    var open_cluster = null;
-    var cluster_crowds = [];
-    $.each(data.cls, function(index, clust) {
-      clust.mloc.reverse();
-
-      if (clust.cids.length===1) {
-        crowd_marker(map,clust.cids[0],clust.mloc,clust.size);
-        return;
-      }
-      var lat = clust.mloc[0];
-      var lng = clust.mloc[1];
-      var delta = 0.005*Math.sqrt(clust.size);
-      var square = L.rectangle(
-        [[lat-delta,lng-1.3*delta],[lat+delta,lng+1.3*delta]],
-        square_options
-      ).addTo(map);
-
-      square.on('click',function(e) {
-        map.setView(clust.mloc,8);
-        if (open_cluster) {
-          open_cluster.setStyle({opacity:0.5,fillOpacity:0.5});
-          $.each(cluster_crowds, function(index, circle) {
-              map.removeLayer(circle);
-          });
-        }
-        open_cluster = square;
-        cluster_crowds = [];
-        square.setStyle({opacity:0.1,fillOpacity:0.02});
-        // FIXME: the crowds in clusters get downloaded twice.
-        get_json('/api/crowd/bulk',{cids:clust.cids.join()},function(crowds) {
-          $.each(crowds.crowds, function(index, crowd) {
-            crowd.mloc.reverse();
-            var circle = crowd_marker(map,crowd._id,crowd.mloc,crowd.uids.length);
-            cluster_crowds.push(circle);
-          });
-        });
-      });
+  get_json('/api/crowd/all',{},function(data) {
+    $.each(data.crowds, function(index, crowd) {
+      crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1]);
     });
   });
 }
