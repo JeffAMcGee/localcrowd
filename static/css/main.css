@@ -9,6 +9,12 @@
     overflow-y: auto;
 }
 
+.leaflet-div-icon {
+    border: none;
+    background: #900000;
+    border-radius: 100px;
+}
+
 
 
 

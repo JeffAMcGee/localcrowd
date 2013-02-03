@@ -30,9 +30,11 @@ function crowd_marker(map,crowd_id,loc,size) {
       opacity: 0.5,
       fillOpacity: 0.5
   };
-  var circle = L.circle( loc, 500*Math.sqrt(size), circle_options );
+  var px = 4+Math.sqrt(size);
+  var icon = L.divIcon({iconSize:[px,px]});
+  var circle = L.marker( loc,{icon:icon} /*, 500*Math.sqrt(size), circle_options*/ );
   circle.on('click',function(e){
-      map.setView(loc,10);
+      map.setView(loc,Math.max(10,map.getZoom()));
       get_json('/api/crowd/'+crowd_id,{},function(crowd) {
         var view = $($.trim(crowd_template(crowd)));
         crowd_tweets(view.find('.tweets'),crowd);
@@ -43,7 +45,6 @@ function crowd_marker(map,crowd_id,loc,size) {
         popup.openOn(map);
       });
   });
-  circle.addTo(map);
   return circle;
 }
 
@@ -73,11 +74,14 @@ function crowd_tweets(tweets_div,crowd) {
 }
 
 function show_clusters(map) {
+  var markers = new L.MarkerClusterGroup();
   get_json('/api/crowd/all',{},function(data) {
     $.each(data.crowds, function(index, crowd) {
-      crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1]);
+      circle = crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1]);
+      markers.addLayer(circle);
     });
   });
+  map.addLayer(markers);
 }
 
 $(function() {
