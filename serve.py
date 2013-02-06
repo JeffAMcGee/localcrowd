@@ -36,22 +36,16 @@ def clusters():
     return get_or_404('Topic','conv')
 
 
-@bottle.route('/api/crowd/all')
+@bottle.route('/api/crowd/bulk')
 def all_crowds():
-    crowds_ = _db['Crowd'].find()
+    zoom = int(bottle.request.query.zoom)
+    crowds_ = _db['Crowd'].find({'zoom':{'$lte':zoom}})
     crowds = [
         (c['_id'],len(c['edges']),round(c['mloc'][0],3),round(c['mloc'][1],3))
         for c in crowds_
     ]
     return dict(crowds=crowds)
 
-
-@bottle.route('/api/crowd/bulk')
-def crowd_bulk():
-    cids_ = bottle.request.query.cids
-    cids = [int(cid) for cid in cids_.split(',')]
-    crowds = _db['Crowd'].find( {'_id':{'$in':cids}} )
-    return dict(crowds=list(crowds))
 
 
 @bottle.route('/api/crowd/:crowd_id')
