@@ -39,7 +39,12 @@ def clusters():
 @bottle.route('/api/crowd/bulk')
 def all_crowds():
     zoom = int(bottle.request.query.zoom)
-    crowds_ = _db['Crowd'].find({'zoom':{'$lte':zoom}})
+    query = {'zoom':{'$lte':zoom}}
+    bounds = bottle.request.query.bounds
+    if bounds:
+        degs = [float(deg) for deg in bounds.split(',')]
+        query['mloc'] = { "$within": { "$box": [degs[:2], degs[2:]]}}
+    crowds_ = _db['Crowd'].find(query)
     crowds = [
         (c['_id'],len(c['edges']),round(c['mloc'][0],3),round(c['mloc'][1],3))
         for c in crowds_

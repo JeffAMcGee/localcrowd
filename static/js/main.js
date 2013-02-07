@@ -1,6 +1,7 @@
 var crowd_template = _.template($('#crowd_template').html());
 var tweet_template = _.template($('#tweet_template').html());
 
+
 function get_json(url,data,success) {
   $.ajax(url,{
       data:data,
@@ -22,6 +23,7 @@ function get_json(url,data,success) {
   });
 }
 
+
 function crowd_marker(map,crowd_id,loc,size) {
   var circle_options = {
       stroke: true,
@@ -30,6 +32,7 @@ function crowd_marker(map,crowd_id,loc,size) {
       opacity: 0.5,
       fillOpacity: 0.5
   };
+  // make the circles have an even width, and an integer radius
   var px = 2*Math.round(2+0.5*Math.sqrt(size));
   var icon = L.divIcon({iconSize:[px,px]});
   var circle = L.marker( loc,{icon:icon} /*, 500*Math.sqrt(size), circle_options*/ );
@@ -48,6 +51,7 @@ function crowd_marker(map,crowd_id,loc,size) {
   });
   return circle;
 }
+
 
 function crowd_tweets(tweets_div,crowd) {
   var next = '';
@@ -74,17 +78,18 @@ function crowd_tweets(tweets_div,crowd) {
   });
 }
 
+
 function show_clusters(map) {
-  //var markers = new L.MarkerClusterGroup();
-  get_json('/api/crowd/bulk',{zoom:1},function(data) {
+  var zoom = Math.max(0,map.getZoom()-6);
+  var bounds = map.getBounds().toBBoxString();
+  get_json('/api/crowd/bulk',{zoom:zoom,bounds:bounds},function(data) {
     $.each(data.crowds, function(index, crowd) {
       circle = crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1]);
       map.addLayer(circle);
-      //markers.addLayer(circle);
     });
   });
-  //map.addLayer(markers);
 }
+
 
 $(function() {
   var map = L.map('map',{maxZoom:13,minZoom:2}).setView([38, -98], 5);
@@ -95,4 +100,5 @@ $(function() {
   }).addTo(map);
 
   show_clusters(map);
+  map.on('zoomend', function(e){show_clusters(map);});
 });
