@@ -40,6 +40,10 @@ def clusters():
 def all_crowds():
     zoom = int(bottle.request.query.zoom)
     query = {'zoom':{'$lte':zoom}}
+    onlysmall = parse_bool(bottle.request.query.onlysmall)
+    if onlysmall and zoom:
+        query['zoom']['$gte'] = 1
+
     bounds = bottle.request.query.bounds
     if bounds:
         degs = [float(deg) for deg in bounds.split(',')]
@@ -110,6 +114,10 @@ def get_or_404(collection,id):
     if not doc:
         bottle.abort(404,'Not Found')
     return doc
+
+
+def parse_bool(bstr):
+    return bstr.lower() in ['t','true','1']
 
 
 if __name__=="__main__":

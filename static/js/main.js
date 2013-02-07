@@ -79,14 +79,14 @@ function crowd_tweets(tweets_div,crowd) {
 }
 
 
-function show_clusters(map) {
-  var zoom = Math.max(0,map.getZoom()-6);
-  var bounds = map.getBounds().toBBoxString();
-  get_json('/api/crowd/bulk',{zoom:zoom,bounds:bounds},function(data) {
+function load_crowds(map,params,callback) {
+  get_json('/api/crowd/bulk',params,function(data) {
+    var group = L.layerGroup();
     $.each(data.crowds, function(index, crowd) {
       circle = crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1]);
-      map.addLayer(circle);
+      group.addLayer(circle);
     });
+    callback(group);
   });
 }
 
@@ -99,6 +99,23 @@ $(function() {
       maxZoom: 18
   }).addTo(map);
 
-  show_clusters(map);
-  map.on('zoomend', function(e){show_clusters(map);});
+  load_crowds(map, {zoom:0}, function(group) {
+    group.addTo(map);
+  });
+
+  var old_crowds = null;
+  function map_moved(e) {
+    var zoom = map.getZoom()-6;
+    if(zoom<1) return;
+    var bounds = map.getBounds().toBBoxString();
+    load_crowds(map, {zoom:zoom,bounds:bounds,onlysmall:1}, function(group) {
+      if(old_crowds)
+        map.removeLayer(old_crowds);
+      map.addLayer(group);
+      old_crowds = group;
+    });
+  }
+
+  map.on('zoomend', map_moved);
+  map.on('moveend', map_moved);
 });
