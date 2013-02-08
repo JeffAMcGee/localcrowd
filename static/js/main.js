@@ -59,7 +59,7 @@ function crowd_tweets(tweets_div,crowd) {
   function fetch_tweets() {
     get_json('/api/crowd/'+crowd._id+'/tweets',{next:next},function(data) {
       $.each(data.tweets, function(index, tweet) {
-        //tweet.html = twttr.txt.autoLink(tweet.tx);
+        tweet.html = twttr.txt.autoLink(tweet.tx,{urlEntities:tweet.ents.urls || []});
         tweets_div.append(tweet_template(tweet));
       });
       next = data.next;
