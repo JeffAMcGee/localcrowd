@@ -37,9 +37,8 @@ function crowd_marker(map,crowd_id,loc,size) {
   var icon = L.divIcon({iconSize:[px,px]});
   var circle = L.marker( loc,{icon:icon} /*, 500*Math.sqrt(size), circle_options*/ );
   circle.on('click',function(e){
-      map.setView(loc,Math.max(10,map.getZoom()));
+      //map.setView(loc,Math.max(10,map.getZoom()));
       get_json('/api/crowd/'+crowd_id,{},function(crowd) {
-        console.log(crowd);
         var view = $($.trim(crowd_template(crowd)));
         crowd_tweets(view.find('.tweets'),crowd);
 
@@ -60,6 +59,7 @@ function crowd_tweets(tweets_div,crowd) {
   function fetch_tweets() {
     get_json('/api/crowd/'+crowd._id+'/tweets',{next:next},function(data) {
       $.each(data.tweets, function(index, tweet) {
+        //tweet.html = twttr.txt.autoLink(tweet.tx);
         tweets_div.append(tweet_template(tweet));
       });
       next = data.next;

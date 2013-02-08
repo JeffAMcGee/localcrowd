@@ -15,6 +15,16 @@
     border-radius: 50%;
 }
 
+.tweets div {
+    margin-bottom: 6px;
+}
+
+.tweets .screen_name {
+    font-size:14px;
+}
+
+
+
 
 
 
