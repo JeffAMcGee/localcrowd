@@ -67,6 +67,7 @@ function crowd_tweets(tweets_div,crowd) {
       });
       next = data.next;
       fetching = false;
+      tweets_div.find('.loading').hide();
     });
   }
 
