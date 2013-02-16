@@ -60,8 +60,8 @@
 
         <script id="crowd_template" type="text/template">
           <div class="crowd_view">
-            <p>Loading...</p>
             <div class="tweets">
+              <p>Loading...</p>
             </div>
           </div>
         </script>
@@ -71,8 +71,15 @@
             <a href="http://twitter.com/<%-usn%>">
               <img src="<%-upiu%>" width="32" height="32"/>
             </a>
-            <span class="screen_name">
-              <a href="http://twitter.com/<%-usn%>">@<%- usn %></a>
+            <span class="dateloc"><%-ul%><br><%-date%></span>
+            <a href="http://twitter.com/<%-usn%>">
+              <span class="real_name">
+                <%-un%>
+              </span><br/>
+              <span class="screen_name">
+                @<%- usn %>
+              </span>
+              </a>
             </span><br/>
             <span><%= html %></span>
           </div>

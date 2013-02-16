@@ -11,31 +11,32 @@
 
 .leaflet-div-icon {
     border: none;
-    background: #900000;
+    background: #b01010;
     border-radius: 50%;
+    box-shadow: 0 0 20px #b01010;
 }
 
 .tweets div {
-    margin-bottom: 6px;
+    margin-bottom: 10px;
+}
+
+.tweets img {
+    float: left;
+    border-radius: 2px;
 }
 
 .tweets .screen_name {
     font-size:14px;
+    margin-left:6px;
 }
 
+.tweets .real_name {
+    font-size:14px;
+    margin-left:6px;
+    color: #333;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.tweets .dateloc {
+    float: right;
+    text-align: right;
+}

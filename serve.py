@@ -35,7 +35,6 @@ def server_static(filename):
 def clusters():
     return get_or_404('Topic','conv')
 
-
 @bottle.route('/api/crowd/bulk')
 def all_crowds():
     zoom = int(bottle.request.query.zoom)
@@ -50,7 +49,7 @@ def all_crowds():
         query['mloc'] = { "$within": { "$box": [degs[:2], degs[2:]]}}
     crowds_ = _db['Crowd'].find(query)
     crowds = [
-        (c['_id'],len(c['edges']),round(c['mloc'][0],3),round(c['mloc'][1],3))
+        (c['_id'],len(c['edges']),round(c['mloc'][0],4),round(c['mloc'][1],4))
         for c in crowds_
     ]
     return dict(crowds=crowds)
@@ -64,7 +63,7 @@ def crowd(crowd_id):
 
 @bottle.route('/api/crowd/:crowd_id/tweets')
 def crowd_tweets(crowd_id):
-    page_size = 20
+    page_size = 15
     next = bottle.request.query.next
     query = {'cid':int(crowd_id)}
     if next:

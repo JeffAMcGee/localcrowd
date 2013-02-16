@@ -33,16 +33,16 @@ function crowd_marker(map,crowd_id,loc,size) {
       fillOpacity: 0.5
   };
   // make the circles have an even width, and an integer radius
-  var px = 2*Math.round(2+0.5*Math.sqrt(size));
+  var px = 2*Math.round(2+Math.sqrt(size));
   var icon = L.divIcon({iconSize:[px,px]});
-  var circle = L.marker( loc,{icon:icon} /*, 500*Math.sqrt(size), circle_options*/ );
+  var circle = L.marker( loc,{icon:icon} );
   circle.on('click',function(e){
       //map.setView(loc,Math.max(10,map.getZoom()));
       get_json('/api/crowd/'+crowd_id,{},function(crowd) {
         var view = $($.trim(crowd_template(crowd)));
         crowd_tweets(view.find('.tweets'),crowd);
 
-        var popup = L.popup({minWidth:500,maxWidth:600});
+        var popup = L.popup({minWidth:400,maxWidth:500});
         popup.setLatLng(loc);
         popup.setContent(view[0]);
         popup.openOn(map);
@@ -59,6 +59,9 @@ function crowd_tweets(tweets_div,crowd) {
   function fetch_tweets() {
     get_json('/api/crowd/'+crowd._id+'/tweets',{next:next},function(data) {
       $.each(data.tweets, function(index, tweet) {
+        var date = new Date(tweet.ca.$date*1000);
+        tweet.date = date.getMonth()+'/'+date.getDate()+'/'+(date.getYear()-100)+
+                     date.getHours()+":"+date.getMinutes()+" ";
         tweet.html = twttr.txt.autoLink(tweet.tx,{urlEntities:tweet.ents.urls || []});
         tweets_div.append(tweet_template(tweet));
       });
@@ -96,7 +99,7 @@ $(function() {
 
   L.tileLayer( 'http://{s}.tile.cloudmade.com/3c84c4f923824f7cb6836564e90876f3/84377/256/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://cloudmade.com">CloudMade</a>',
-      maxZoom: 18
+      maxZoom: 16
   }).addTo(map);
 
   load_crowds(map, {zoom:0}, function(group) {
