@@ -24,18 +24,15 @@ function get_json(url,data,success) {
 }
 
 
-function crowd_marker(map,crowd_id,loc,size) {
-  var circle_options = {
-      stroke: true,
-      color: 'red',
-      fillColor: 'red',
-      opacity: 0.5,
-      fillOpacity: 0.5
-  };
+function crowd_marker(map,crowd_id,loc,size,red) {
   // make the circles have an even width, and an integer radius
   var px = 2*Math.round(2+Math.sqrt(size));
-  var icon = L.divIcon({iconSize:[px,px]});
-  var circle = L.marker( loc,{icon:icon} );
+  // FIXME: This color calculation is ugly.
+  var red_amount = Math.round(0xa0*red+0x10);
+  var color = '#'+(red_amount.toString(16))+'10'+(0xc0-red_amount).toString(16);
+  var circle = L.circleMarker( loc, {color:color} );
+  circle.setRadius(px/2);
+
   circle.on('click',function(e){
       //map.setView(loc,Math.max(10,map.getZoom()));
       get_json('/api/crowd/'+crowd_id,{},function(crowd) {
@@ -87,7 +84,7 @@ function load_crowds(map,params,callback) {
   get_json('/api/crowd/bulk',params,function(data) {
     var group = L.layerGroup();
     $.each(data.crowds, function(index, crowd) {
-      circle = crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1]);
+      circle = crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1],crowd[4]);
       group.addLayer(circle);
     });
     callback(group);

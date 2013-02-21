@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import division
+
 import datetime
 import json
 
@@ -35,6 +37,14 @@ def server_static(filename):
 def clusters():
     return get_or_404('Topic','conv')
 
+
+def _red_vs_blue(crowd):
+    total = sum(crowd['tpcs'].itervalues())
+    if not total:
+        return .5
+    return crowd['tpcs'].get('red',0)/total
+
+
 @bottle.route('/api/crowd/bulk')
 def all_crowds():
     zoom = int(bottle.request.query.zoom)
@@ -49,7 +59,13 @@ def all_crowds():
         query['mloc'] = { "$within": { "$box": [degs[:2], degs[2:]]}}
     crowds_ = _db['Crowd'].find(query)
     crowds = [
-        (c['_id'],len(c['edges']),round(c['mloc'][0],4),round(c['mloc'][1],4))
+        (
+            c['_id'],
+            len(c['edges']),
+            round(c['mloc'][0],4),
+            round(c['mloc'][1],4),
+            round(_red_vs_blue(c),3),
+        )
         for c in crowds_
     ]
     return dict(crowds=crowds)
