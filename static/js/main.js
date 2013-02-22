@@ -26,12 +26,12 @@ function get_json(url,data,success) {
 
 function crowd_marker(map,crowd_id,loc,size,red) {
   // make the circles have an even width, and an integer radius
-  var px = 2*Math.round(2+Math.sqrt(size));
+  var radius = 2*Math.round(3+Math.sqrt(size));
   // FIXME: This color calculation is ugly.
-  var red_amount = Math.round(0xa0*red+0x10);
+  var scaled_red = Math.min(Math.max(2*red-0.5,0),1);
+  var red_amount = Math.round(0xa0*scaled_red+0x10);
   var color = '#'+(red_amount.toString(16))+'10'+(0xc0-red_amount).toString(16);
-  var circle = L.circleMarker( loc, {color:color} );
-  circle.setRadius(px/2);
+  var circle = L.circleMarker( loc, {color:color,radius:radius} );
 
   circle.on('click',function(e){
       //map.setView(loc,Math.max(10,map.getZoom()));
