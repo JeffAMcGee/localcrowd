@@ -6,6 +6,7 @@ settings = dict(
     mongo_host = 'localhost',
     mongo_port = 27017,
     mongo_db = 'test',
+    debug = True,
 )
 
 try:

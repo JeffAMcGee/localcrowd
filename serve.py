@@ -15,17 +15,17 @@ _db = None
 #############
 # Content
 
-@bottle.route('/')
+@bottle.route('/localcrowd/')
 def index():
     return bottle.static_file('index.html', root='static')
 
 
-@bottle.route('/favicon.ico')
+@bottle.route('/localcrowd/favicon.ico')
 def favicon():
     return bottle.static_file('favicon.ico', root='static')
 
 
-@bottle.route('/static/<filename:path>')
+@bottle.route('/localcrowd/static/<filename:path>')
 def server_static(filename):
     return bottle.static_file(filename, root='static')
 
@@ -33,7 +33,7 @@ def server_static(filename):
 #############
 # API
 
-@bottle.route('/api/clusters')
+@bottle.route('/localcrowd/api/clusters')
 def clusters():
     return get_or_404('Topic','conv')
 
@@ -45,7 +45,7 @@ def _red_vs_blue(crowd):
     return crowd['tpcs'].get('red',0)/total
 
 
-@bottle.route('/api/crowd/bulk')
+@bottle.route('/localcrowd/api/crowd/bulk')
 def all_crowds():
     zoom = int(bottle.request.query.zoom)
     query = {'zoom':{'$lte':zoom}}
@@ -72,12 +72,12 @@ def all_crowds():
 
 
 
-@bottle.route('/api/crowd/:crowd_id')
+@bottle.route('/localcrowd/api/crowd/:crowd_id')
 def crowd(crowd_id):
     return get_or_404('Crowd',int(crowd_id))
 
 
-@bottle.route('/api/crowd/:crowd_id/tweets')
+@bottle.route('/localcrowd/api/crowd/:crowd_id/tweets')
 def crowd_tweets(crowd_id):
     page_size = 15
     next = bottle.request.query.next
@@ -96,7 +96,7 @@ def crowd_tweets(crowd_id):
     ))
 
 
-@bottle.route('/api/user/:user_id')
+@bottle.route('/localcrowd/api/user/:user_id')
 def user(user_id):
     doc = get_or_404('User',int(user_id))
     for k in ['rfrds','jfols','jfrds','jats','gnp']:
@@ -141,6 +141,12 @@ if __name__=="__main__":
         settings['mongo_port'],
     )
     _db = cli[settings['mongo_db']]
+
+    if settings.get('debug'):
+        kwargs = dict(reloader=True)
+    else:
+        kwargs = dict(server='flup')
+
     bottle.run(host=settings['http_host'],
                port=settings['http_port'],
-               reloader=True)
+               **kwargs)

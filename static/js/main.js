@@ -35,7 +35,7 @@ function crowd_marker(map,crowd_id,loc,size,red) {
 
   circle.on('click',function(e){
       //map.setView(loc,Math.max(10,map.getZoom()));
-      get_json('/api/crowd/'+crowd_id,{},function(crowd) {
+      get_json('/localcrowd/api/crowd/'+crowd_id,{},function(crowd) {
         var view = $($.trim(crowd_template(crowd)));
         crowd_tweets(view.find('.tweets'),crowd);
 
@@ -54,7 +54,7 @@ function crowd_tweets(tweets_div,crowd) {
   var fetching = true;
 
   function fetch_tweets() {
-    get_json('/api/crowd/'+crowd._id+'/tweets',{next:next},function(data) {
+    get_json('/localcrowd/api/crowd/'+crowd._id+'/tweets',{next:next},function(data) {
       $.each(data.tweets, function(index, tweet) {
         var date = new Date(tweet.ca.$date*1000);
         tweet.date = date.getMonth()+'/'+date.getDate()+'/'+(date.getYear()-100)+
@@ -81,7 +81,7 @@ function crowd_tweets(tweets_div,crowd) {
 
 
 function load_crowds(map,params,callback) {
-  get_json('/api/crowd/bulk',params,function(data) {
+  get_json('/localcrowd/api/crowd/bulk',params,function(data) {
     var group = L.layerGroup();
     $.each(data.crowds, function(index, crowd) {
       circle = crowd_marker(map,crowd[0],[crowd[3],crowd[2]],crowd[1],crowd[4]);
