@@ -38,8 +38,13 @@ function crowd_marker(map,crowd_id,loc,size,red) {
       get_json('/localcrowd/api/crowd/'+crowd_id,{},function(crowd) {
         var view = $($.trim(crowd_template(crowd)));
         crowd_tweets(view.find('.tweets'),crowd);
+        var width;
+        if($(window).width()>480)
+          width = 450;
+        else
+          width = 240;
 
-        var popup = L.popup({minWidth:400,maxWidth:500});
+        var popup = L.popup({minWidth:width-50,maxWidth:width});
         popup.setLatLng(loc);
         popup.setContent(view[0]);
         popup.openOn(map);
@@ -95,8 +100,8 @@ function load_crowds(map,params,callback) {
 $(function() {
   var map = L.map('map',{maxZoom:13,minZoom:2}).setView([38, -98], 5);
 
-  L.tileLayer( 'http://{s}.tile.cloudmade.com/3c84c4f923824f7cb6836564e90876f3/84377/256/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://cloudmade.com">CloudMade</a>',
+  L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>',
       maxZoom: 16
   }).addTo(map);
 
